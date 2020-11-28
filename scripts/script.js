@@ -36,16 +36,17 @@ application.controller("MassifVisualizeController", [function() {
         data.datasets[0].data.forEach(function(bytes, i) {
             data.datasets[0].data[i] = (data.datasets[0].data[i] / munit[0]).toFixed(3);
         });
-        var mtime = rightUnit(1000, largestTime);
+        var time_unit_log10 = Math.floor(Math.log10(data.labels[1]));
+        var time_unit = 10**time_unit_log10;
         data.labels.forEach(function(time, i) {
-            data.labels[i] = (data.labels[i] / mtime[0]).toFixed(0);
+            data.labels[i] = data.labels[i] / time_unit;
         });
         console.log(data.datasets[0].data[data.datasets[0].data.length - 1]);
         document.getElementById("chart").remove(); // this is my <canvas> element
         document.getElementById("chart-container").innerHTML += '<canvas class="col-12" id="chart"></canvas>';
         var chart = document.getElementById("chart").getContext('2d');
         new Chart(chart, {
-            type: 'line',
+            type: 'bar',
             data: data,
             options: {
                 scales: {
@@ -53,8 +54,14 @@ application.controller("MassifVisualizeController", [function() {
                         {
                             scaleLabel: {
                                 display: true,
-                                labelString: "Time (" + (munit[1] == "K" ? "10^3 " : munit[1] == "M" ? "10^6 " : munit[1] == "G" ? "10^9 " : "") + "instructions)"
+                                labelString: "Time (10^" + time_unit_log10.toFixed(0) + " instructions)"
                             },
+                            ticks: {
+                                maxTicksLimit: 6,
+                                callback: function(value) {
+                                    return value.toFixed(0);
+                                }
+                            }
                         }
                     ],
                     yAxes: [
@@ -64,7 +71,6 @@ application.controller("MassifVisualizeController", [function() {
                                 labelString: "Memory consumption (" + munit[1] + "B)"
                             },
                             ticks: {
-                                stepSize: parsed.snapshots.length,
                                 callback: function(value) {
                                     return value + " " + munit[1] + "B";
                                 }

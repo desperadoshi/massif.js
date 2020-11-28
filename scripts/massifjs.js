@@ -38,4 +38,4 @@ var Massifjs = {
     }
 };
 
-module.exports = Massifjs;
+// module.exports = Massifjs;
